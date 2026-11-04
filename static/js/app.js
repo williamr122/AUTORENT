@@ -18,7 +18,6 @@ let cacheAlquileres = [];
 document.addEventListener("DOMContentLoaded", () => {
     checkCurrentUser();
     navigateTab("dashboard");
-    initReglasMatriz();
 });
 
 function showToast(message, type = "success") {
@@ -127,7 +126,6 @@ function navigateTab(tabName) {
         case "devoluciones": loadDevoluciones(); break;
         case "mantenimientos": loadMantenimientos(); break;
         case "empleados": loadEmpleados(); break;
-        case "reglas": break;
     }
 }
 
@@ -243,11 +241,11 @@ async function loadClientes() {
                 <td class="px-5 py-3.5 text-slate-600"><i class="fa-solid fa-phone text-xs text-slate-400 mr-1"></i>${c.Telefono}</td>
                 <td class="px-5 py-3.5 text-slate-600 text-xs max-w-xs truncate">${c.Direccion}</td>
                 <td class="px-5 py-3.5 text-right space-x-1 whitespace-nowrap">
-                    <button onclick='editarCliente(${JSON.stringify(c)})' title="Modificar datos (RF03)" class="text-slate-600 hover:text-indigo-600 p-1.5 rounded-lg hover:bg-slate-100">
+                    <button onclick='editarCliente(${JSON.stringify(c)})' title="Modificar datos" class="text-slate-600 hover:text-indigo-600 p-1.5 rounded-lg hover:bg-slate-100">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </button>
                     ${currentUser.rol !== 'Gerente' ? `
-                    <button onclick="eliminarCliente(${c.Id_cliente})" title="Eliminar cliente (RF04 / RB15)" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50">
+                    <button onclick="eliminarCliente(${c.Id_cliente})" title="Eliminar cliente" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50">
                         <i class="fa-solid fa-trash-can"></i>
                     </button>` : ''}
                 </td>
@@ -265,7 +263,7 @@ function buscarClientes(val) {
 }
 
 function openModalCliente() {
-    document.getElementById("modal-cliente-title").innerText = "Registrar Cliente (RF01)";
+    document.getElementById("modal-cliente-title").innerText = "Registrar Cliente";
     document.getElementById("cliente-id").value = "";
     document.getElementById("cliente-cedula").value = "";
     document.getElementById("cliente-nombres").value = "";
@@ -276,7 +274,7 @@ function openModalCliente() {
 }
 
 function editarCliente(c) {
-    document.getElementById("modal-cliente-title").innerText = "Modificar Datos de Cliente (RF03)";
+    document.getElementById("modal-cliente-title").innerText = "Modificar Datos de Cliente";
     document.getElementById("cliente-id").value = c.Id_cliente;
     document.getElementById("cliente-cedula").value = c.Numero_Identificacion;
     document.getElementById("cliente-nombres").value = c.Nombres;
@@ -391,11 +389,11 @@ async function loadVehiculos() {
                                 <i class="fa-solid fa-circle-check"></i> Liberar
                             </button>
                         ` : ''}
-                        <button onclick='editarVehiculo(${JSON.stringify(v)})' title="Editar información (RF07)" class="text-slate-600 hover:text-indigo-600 p-1.5 rounded-lg hover:bg-slate-100">
+                        <button onclick='editarVehiculo(${JSON.stringify(v)})' title="Editar información" class="text-slate-600 hover:text-indigo-600 p-1.5 rounded-lg hover:bg-slate-100">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </button>
                         ${currentUser.rol !== 'Gerente' ? `
-                        <button onclick="eliminarVehiculo(${v.Id_vehiculo})" title="Eliminar vehículo (RF08 / RB17)" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50">
+                        <button onclick="eliminarVehiculo(${v.Id_vehiculo})" title="Eliminar vehículo" class="text-slate-400 hover:text-rose-600 p-1.5 rounded-lg hover:bg-rose-50">
                             <i class="fa-solid fa-trash-can"></i>
                         </button>` : ''}
                     </td>
@@ -409,7 +407,7 @@ async function loadVehiculos() {
 }
 
 async function openModalVehiculo() {
-    document.getElementById("modal-vehiculo-title").innerText = "Registrar Vehículo (RF05)";
+    document.getElementById("modal-vehiculo-title").innerText = "Registrar Vehículo";
     document.getElementById("vehiculo-id").value = "";
     document.getElementById("vehiculo-matricula").value = "";
     document.getElementById("vehiculo-año").value = 2024;
@@ -426,7 +424,7 @@ async function openModalVehiculo() {
 }
 
 async function editarVehiculo(v) {
-    document.getElementById("modal-vehiculo-title").innerText = "Actualizar Vehículo (RF07)";
+    document.getElementById("modal-vehiculo-title").innerText = "Actualizar Vehículo";
     document.getElementById("vehiculo-id").value = v.Id_vehiculo;
     document.getElementById("vehiculo-matricula").value = v.matricula;
     document.getElementById("vehiculo-año").value = v.año;
@@ -682,12 +680,12 @@ async function loadReservas() {
                     </td>
                     <td class="px-5 py-3.5 text-right space-x-1 whitespace-nowrap">
                         ${r.estado === 'Confirmada' ? `
-                            <button onclick='convertirReservaEnAlquiler(${JSON.stringify(r)})' title="Convertir a contrato de alquiler (RB16)" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold shadow-sm">
+                            <button onclick='convertirReservaEnAlquiler(${JSON.stringify(r)})' title="Convertir a contrato de alquiler" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs px-3 py-1.5 rounded-lg font-semibold shadow-sm">
                                 <i class="fa-solid fa-key mr-1"></i> Alquilar
                             </button>
                         ` : ''}
                         ${r.estado === 'Pendiente' ? `
-                            <button onclick="cambiarEstadoReserva(${r.Id_reserva}, 'Confirmada')" title="Confirmar (valida RB04)" class="text-emerald-600 hover:text-emerald-800 p-1.5 rounded-lg hover:bg-emerald-50">
+                            <button onclick="cambiarEstadoReserva(${r.Id_reserva}, 'Confirmada')" title="Confirmar reserva" class="text-emerald-600 hover:text-emerald-800 p-1.5 rounded-lg hover:bg-emerald-50">
                                 <i class="fa-solid fa-check"></i>
                             </button>
                             <button onclick="cambiarEstadoReserva(${r.Id_reserva}, 'Cancelada')" title="Cancelar reserva" class="text-rose-500 hover:text-rose-700 p-1.5 rounded-lg hover:bg-rose-50">
@@ -814,10 +812,10 @@ async function loadAlquileres() {
                     </td>
                     <td class="px-5 py-3.5 text-right space-x-1 whitespace-nowrap">
                         ${isActivo ? `
-                            <button onclick="registrarPagoParaAlquiler(${a.Id_alquiler})" title="Registrar Pago (RF12)" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-emerald-200">
+                            <button onclick="registrarPagoParaAlquiler(${a.Id_alquiler})" title="Registrar Pago" class="bg-emerald-50 text-emerald-700 hover:bg-emerald-100 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-emerald-200">
                                 <i class="fa-solid fa-hand-holding-dollar"></i> Cobrar
                             </button>
-                            <button onclick="registrarDevolucionParaAlquiler(${a.Id_alquiler})" title="Registrar Devolución (RF13)" class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-indigo-200">
+                            <button onclick="registrarDevolucionParaAlquiler(${a.Id_alquiler})" title="Registrar Devolución" class="bg-indigo-50 text-indigo-700 hover:bg-indigo-100 px-2.5 py-1.5 rounded-lg text-xs font-semibold border border-indigo-200">
                                 <i class="fa-solid fa-rotate-left"></i> Devolver
                             </button>
                         ` : `
@@ -833,7 +831,7 @@ async function loadAlquileres() {
 }
 
 async function openModalAlquilerDirecto() {
-    document.getElementById("modal-alquiler-title").innerText = "Formalizar Contrato Directo (Sin Reserva Previa - RB16)";
+    document.getElementById("modal-alquiler-title").innerText = "Formalizar Contrato Directo";
     document.getElementById("alquiler-id-reserva").value = "";
     document.getElementById("alquiler-reserva-info").classList.add("hidden");
 
@@ -1185,7 +1183,7 @@ async function loadEmpleados() {
 
 function openModalEmpleado() {
     if (currentUser.rol !== "Administrador") {
-        showToast("Solo los Administradores pueden crear usuarios (RF15).", "error");
+        showToast("Solo los Administradores pueden crear usuarios.", "error");
         return;
     }
     document.getElementById("emp-nombres").value = "";
@@ -1223,49 +1221,6 @@ async function guardarEmpleado(e) {
     } catch (err) {
         showToast("Error al guardar empleado", "error");
     }
-}
-
-// =====================================================================
-// 11. REGLAS DE NEGOCIO (RB01 - RB17)
-// =====================================================================
-const REGLAS_LISTA = [
-    { id: "RB01", nombre: "Unicidad de cliente", desc: "Cada cliente debe poseer un número de identificación único (cédula o pasaporte).", implementacion: "Constraint UNIQUE en BD y validación de inserción en models.py" },
-    { id: "RB02", nombre: "Unicidad vehicular", desc: "Todo vehículo registrado debe contar con una matrícula/placa única que lo identifique sin ambigüedades.", implementacion: "Constraint UNIQUE en columna matricula de VEHICULO" },
-    { id: "RB03", nombre: "Titularidad de reserva", desc: "Un cliente puede realizar múltiples reservas, pero cada reserva pertenece a un único cliente titular.", implementacion: "Relación 1:N entre CLIENTE y RESERVA con clave foránea obligatoria" },
-    { id: "RB04", nombre: "Exclusividad temporal de reserva", desc: "Un vehículo no puede tener dos reservas confirmadas cuyos períodos de inicio y fin se superpongan.", implementacion: "Trigger en BD y validación en Python antes de Confirmar reserva" },
-    { id: "RB05", nombre: "Disponibilidad para alquiler", desc: "Solo se permite formalizar contratos de alquiler sobre vehículos cuyo estado sea estrictamente 'Disponible'.", implementacion: "Trigger BEFORE INSERT ON ALQUILER y verificación en app.py" },
-    { id: "RB06", nombre: "Restricción por mantenimiento", desc: "Ningún vehículo con estado 'En Mantenimiento' puede ser asignado a una reserva o contrato de alquiler.", implementacion: "Trigger en BD y filtro de selección en interfaz web" },
-    { id: "RB07", nombre: "Trazabilidad del contrato", desc: "Todo alquiler debe estar vinculado obligatoriamente a un único cliente, un vehículo y un empleado responsable.", implementacion: "Foreign Keys NOT NULL en ALQUILER hacia CLIENTE, VEHICULO y EMPLEADO" },
-    { id: "RB08", nombre: "Registro temporal de alquiler", desc: "Todo contrato de alquiler debe especificar una fecha y hora de inicio y una fecha prevista de devolución.", implementacion: "Columnas fecha_inicio y fecha_dev_prevista NOT NULL" },
-    { id: "RB09", nombre: "Coherencia temporal", desc: "La fecha y hora prevista de devolución debe ser estrictamente posterior a la fecha y hora de inicio del alquiler.", implementacion: "CHECK (fecha_dev_prevista > fecha_inicio) en tabla ALQUILER" },
-    { id: "RB10", nombre: "Asociación de pagos", desc: "Un alquiler puede registrar uno o varios pagos, pero cada registro de pago pertenece a un solo alquiler.", implementacion: "Relación 1:N entre ALQUILER y PAGO" },
-    { id: "RB11", nombre: "Validación de importes", desc: "El monto registrado en cada transacción de pago debe ser un valor numérico estrictamente mayor que cero.", implementacion: "CHECK (monto > 0) en tabla PAGO y validación en API" },
-    { id: "RB12", nombre: "Unicidad de devolución", desc: "Cada contrato de alquiler puede estar asociado a un único registro final de devolución del vehículo (1:0..1).", implementacion: "Constraint UNIQUE en Id_alquiler en tabla DEVOLUCION" },
-    { id: "RB13", nombre: "Vinculación de devolución", desc: "Un registro de devolución sólo puede crearse si está vinculado a un contrato de alquiler activo y existente.", implementacion: "Validación de estado 'Activo' en backend previo a inserción" },
-    { id: "RB14", nombre: "Historial mecánico", desc: "Un vehículo puede acumular múltiples registros de mantenimiento preventivo o correctivo a lo largo de su ciclo de vida.", implementacion: "Relación 1:N entre VEHICULO y MANTENIMIENTO" },
-    { id: "RB15", nombre: "Integridad histórica de cliente", desc: "Se prohíbe eliminar físicamente clientes que tengan reservas, contratos de alquiler, pagos u otros registros históricos asociados.", implementacion: "ON DELETE RESTRICT en FKs y validación previa en delete_cliente" },
-    { id: "RB16", nombre: "Origen del alquiler", desc: "El alquiler podrá originarse a partir de una reserva confirmada o realizarse directamente sin reserva previa.", implementacion: "Id_reserva NULLABLE en ALQUILER y cambio automático a Completada" },
-    { id: "RB17", nombre: "Integridad histórica de vehículos", desc: "Se prohíbe eliminar físicamente vehículos que tengan reservas, alquileres o mantenimientos históricos.", implementacion: "ON DELETE RESTRICT en FKs y validación previa en delete_vehiculo" }
-];
-
-function initReglasMatriz() {
-    const cont = document.getElementById("reglas-cards-container");
-    if (!cont) return;
-    cont.innerHTML = REGLAS_LISTA.map(r => `
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
-            <div>
-                <div class="flex items-center justify-between mb-2">
-                    <span class="text-xs font-black bg-indigo-100 text-indigo-800 px-2.5 py-1 rounded-lg">${r.id}</span>
-                    <span class="text-xs text-emerald-600 font-semibold"><i class="fa-solid fa-circle-check mr-1"></i>Activa</span>
-                </div>
-                <h4 class="font-bold text-slate-800 text-sm mb-1">${r.nombre}</h4>
-                <p class="text-xs text-slate-600 mb-3">${r.desc}</p>
-            </div>
-            <div class="bg-slate-50 p-2.5 rounded-xl border border-slate-200 text-[11px] text-slate-500 font-mono">
-                <i class="fa-solid fa-shield-halved text-indigo-500 mr-1"></i> ${r.implementacion}
-            </div>
-        </div>
-    `).join("");
 }
 
 // =====================================================================
