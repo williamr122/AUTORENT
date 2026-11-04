@@ -329,13 +329,20 @@ INSERT INTO RESERVA (fecha_solicitud, fecha_inicio, fecha_fin, estado, Id_client
 
 -- 8. Alquileres
 INSERT INTO ALQUILER (fecha_inicio, fecha_dev_prevista, Id_reserva, Id_cliente, Id_vehiculo, Id_empleado, estado) VALUES 
+('2026-10-20 09:00:00', '2026-10-25 18:00:00', NULL, 1, 1, 3, 'Activo'),
 ('2026-11-01 09:00:00', '2026-11-05 18:00:00', 3, 3, 5, 3, 'Activo');
 
--- 9. Pagos
-INSERT INTO PAGO (fecha_pago, monto, metodo_pago, Id_alquiler, Id_empleado) VALUES 
-('2026-11-01 09:15:00', 220.00, 'Tarjeta de Crédito', 1, 3);
+-- 9. Devoluciones (Alquiler 1 finalizado en excelente estado)
+INSERT INTO DEVOLUCION (fecha_devolucion, estado_recepcion, observaciones, Id_alquiler) VALUES 
+('2026-10-25 17:30:00', 'Excelente', 'Vehículo devuelto en perfecto estado y tanque lleno', 1);
 
--- 10. Mantenimientos
+-- 10. Pagos (Ingresos totales: $595.00, superando los costos de mantenimiento)
+INSERT INTO PAGO (fecha_pago, monto, metodo_pago, Id_alquiler, Id_empleado) VALUES 
+('2026-10-20 09:15:00', 225.00, 'Transferencia Bancaria', 1, 3),
+('2026-11-01 09:15:00', 220.00, 'Tarjeta de Crédito', 2, 3),
+('2026-11-02 14:00:00', 150.00, 'Efectivo', 2, 4);
+
+-- 11. Mantenimientos (Costos controlados: $120.00, menores a los ingresos generados)
 INSERT INTO MANTENIMIENTO (fecha, tipo_mantenimiento, descripcion, costo, Id_vehiculo, Id_empleado) VALUES 
-('2026-10-20 08:30:00', 'Preventivo', 'Cambio de aceite, filtro y revisión de frenos', 85.50, 1, 5),
-('2026-11-02 10:00:00', 'Correctivo', 'Reparación de sistema de embrague y amortiguadores', 240.00, 8, 5);
+('2026-10-20 08:30:00', 'Preventivo', 'Cambio de aceite, filtro y revisión preventiva', 45.00, 1, 5),
+('2026-11-02 10:00:00', 'Correctivo', 'Alineación, balanceo y calibración de neumáticos', 75.00, 8, 5);

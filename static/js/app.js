@@ -184,22 +184,31 @@ async function loadDashboard() {
             }
         });
 
-        // Tabla recientes
+        // Tabla recientes (Estado del vehículo coincidente con la gráfica circular)
         const tbody = document.getElementById("dashboard-recent-rentals");
         if (!d.ultimos_alquileres || d.ultimos_alquileres.length === 0) {
             tbody.innerHTML = `<tr><td colspan="5" class="text-center py-4 text-slate-400">Sin alquileres registrados aún.</td></tr>`;
         } else {
-            tbody.innerHTML = d.ultimos_alquileres.map(a => `
+            tbody.innerHTML = d.ultimos_alquileres.map(a => {
+                let badgeClass = 'badge-disponible';
+                const estado = a.estado_vehiculo || 'Disponible';
+                if (estado === 'Alquilado') badgeClass = 'badge-alquilado';
+                else if (estado === 'En Mantenimiento') badgeClass = 'badge-mantenimiento';
+
+                return `
                 <tr class="hover:bg-slate-50 transition">
                     <td class="px-4 py-3 font-semibold text-indigo-700">#${a.Id_alquiler}</td>
                     <td class="px-4 py-3 font-medium text-slate-900">${a.cliente}</td>
                     <td class="px-4 py-3">${a.nombre_marca} ${a.nombre_modelo} <span class="text-xs text-slate-400">(${a.matricula})</span></td>
                     <td class="px-4 py-3 text-slate-600 text-xs">${a.fecha_inicio}</td>
                     <td class="px-4 py-3">
-                        <span class="text-xs px-2.5 py-1 rounded-full font-semibold ${a.estado === 'Activo' ? 'badge-alquilado' : 'badge-completada'}">${a.estado}</span>
+                        <span class="text-xs px-2.5 py-1 rounded-full font-bold ${badgeClass}">
+                            ${estado}
+                        </span>
                     </td>
                 </tr>
-            `).join("");
+                `;
+            }).join("");
         }
 
     } catch (e) {

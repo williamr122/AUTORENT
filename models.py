@@ -548,6 +548,12 @@ def create_mantenimiento(data: Dict[str, Any]) -> int:
     if costo < 0:
         raise BusinessRuleError("El costo del mantenimiento no puede ser negativo.")
 
+    # Control Financiero: Los costos no deben superar los ingresos acumulados
+    total_ingresos = database.execute_single("SELECT COALESCE(SUM(monto), 0) as total FROM PAGO")["total"]
+    total_costos_actuales = database.execute_single("SELECT COALESCE(SUM(costo), 0) as total FROM MANTENIMIENTO")["total"]
+    if (total_costos_actuales + costo) > total_ingresos:
+        raise BusinessRuleError(f"Control Financiero: El costo de la orden (${costo:.2f}) excede el presupuesto disponible. Los costos totales (${total_costos_actuales + costo:.2f}) no deben superar los ingresos generados (${total_ingresos:.2f}).")
+
     id_mant = database.execute_dml(
         "INSERT INTO MANTENIMIENTO (tipo_mantenimiento, descripcion, costo, Id_vehiculo, Id_empleado) VALUES (?, ?, ?, ?, ?)",
         (tipo, descripcion, costo, id_vehiculo, id_empleado)
@@ -626,9 +632,10 @@ def get_dashboard_metrics() -> Dict[str, Any]:
         GROUP BY c.Id_categoria
     """)
 
-    # Últimos 5 alquileres
+    # Últimos 5 alquileres con estado actual del vehículo (coincidente con la gráfica circular)
     ultimos_alquileres = database.execute_query("""
-        SELECT a.Id_alquiler, a.fecha_inicio, a.estado,
+        SELECT a.Id_alquiler, a.fecha_inicio, a.estado AS estado_alquiler,
+               v.estado AS estado_vehiculo,
                c.Nombres || ' ' || c.Apellidos as cliente,
                v.matricula, ma.nombre_marca, m.nombre_modelo
         FROM ALQUILER a

@@ -145,20 +145,29 @@ def seed_data(conn: sqlite3.Connection):
 
     # 8. Alquileres
     alquileres = [
+        ('2026-10-20 09:00:00', '2026-10-25 18:00:00', None, 1, 1, 3, 'Activo'),
         ('2026-11-01 09:00:00', '2026-11-05 18:00:00', 3, 3, 5, 3, 'Activo')
     ]
     cursor.executemany("INSERT INTO ALQUILER (fecha_inicio, fecha_dev_prevista, Id_reserva, Id_cliente, Id_vehiculo, Id_empleado, estado) VALUES (?, ?, ?, ?, ?, ?, ?)", alquileres)
 
-    # 9. Pagos
+    # 9. Devoluciones (Alquiler 1 ya devuelto y en estado Disponible)
+    devoluciones = [
+        ('2026-10-25 17:30:00', 'Excelente', 'Vehículo devuelto en perfecto estado y tanque lleno', 1)
+    ]
+    cursor.executemany("INSERT INTO DEVOLUCION (fecha_devolucion, estado_recepcion, observaciones, Id_alquiler) VALUES (?, ?, ?, ?)", devoluciones)
+
+    # 10. Pagos (Ingresos totales: $595.00, superando ampliamente los costos)
     pagos = [
-        ('2026-11-01 09:15:00', 220.00, 'Tarjeta de Crédito', 1, 3)
+        ('2026-10-20 09:15:00', 225.00, 'Transferencia Bancaria', 1, 3),
+        ('2026-11-01 09:15:00', 220.00, 'Tarjeta de Crédito', 2, 3),
+        ('2026-11-02 14:00:00', 150.00, 'Efectivo', 2, 4)
     ]
     cursor.executemany("INSERT INTO PAGO (fecha_pago, monto, metodo_pago, Id_alquiler, Id_empleado) VALUES (?, ?, ?, ?, ?)", pagos)
 
-    # 10. Mantenimientos
+    # 11. Mantenimientos (Costos controlados: $120.00, menores a los ingresos de $595.00)
     mantenimientos = [
-        ('2026-10-20 08:30:00', 'Preventivo', 'Cambio de aceite, filtros y revisión de frenos', 85.50, 1, 5),
-        ('2026-11-02 10:00:00', 'Correctivo', 'Reparación de embrague y amortiguadores delanteros', 240.00, 8, 5)
+        ('2026-10-20 08:30:00', 'Preventivo', 'Cambio de aceite, filtros y chequeo preventivo', 45.00, 1, 5),
+        ('2026-11-02 10:00:00', 'Correctivo', 'Alineación, balanceo y calibración general', 75.00, 8, 5)
     ]
     cursor.executemany("INSERT INTO MANTENIMIENTO (fecha, tipo_mantenimiento, descripcion, costo, Id_vehiculo, Id_empleado) VALUES (?, ?, ?, ?, ?, ?)", mantenimientos)
 

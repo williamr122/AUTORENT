@@ -10,3 +10,4 @@ from app import app
 
 # Export para Vercel WSGI
 app = app
+
