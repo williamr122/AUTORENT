@@ -5,10 +5,24 @@ Implementa la conexión, creación de esquema y seed data inicial.
 
 import sqlite3
 import os
+import shutil
 from typing import List, Dict, Any, Optional
 
-DB_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "autorent.db")
-SQL_SCHEMA_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "sql", "schema_sqlite.sql")
+IS_VERCEL = bool(os.environ.get("VERCEL"))
+ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
+BUNDLED_DB = os.path.join(ROOT_DIR, "autorent.db")
+SQL_SCHEMA_FILE = os.path.join(ROOT_DIR, "sql", "schema_sqlite.sql")
+
+if IS_VERCEL:
+    DB_FILE = "/tmp/autorent.db"
+    # En Vercel Serverless, copiar base precargada a /tmp si no existe
+    if not os.path.exists(DB_FILE) and os.path.exists(BUNDLED_DB):
+        try:
+            shutil.copyfile(BUNDLED_DB, DB_FILE)
+        except Exception:
+            pass
+else:
+    DB_FILE = BUNDLED_DB
 
 def get_db_connection() -> sqlite3.Connection:
     """Retorna una conexión a SQLite con foreign_keys habilitadas y formato diccionario."""

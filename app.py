@@ -10,7 +10,12 @@ import database
 import models
 from models import BusinessRuleError
 
-app = Flask(__name__, static_folder="static", template_folder="templates")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+app = Flask(
+    __name__,
+    static_folder=os.path.join(BASE_DIR, "static"),
+    template_folder=os.path.join(BASE_DIR, "templates")
+)
 app.secret_key = "autorent_secret_key_espol_paralelo_5"
 
 # Inicializar BD al arrancar
