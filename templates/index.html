@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoRent - Sistema de Alquiler de Vehículos | ESPOL</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="bg-slate-100 font-sans text-slate-800 min-h-screen flex flex-col">
+
+    <!-- BARRA SUPERIOR / HEADER -->
+    <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 p-2.5 rounded-xl shadow-inner flex items-center justify-center">
+                    <i class="fa-solid fa-car-side text-2xl text-yellow-400"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight flex items-center gap-2">
+                        AutoRent
+                        <span class="text-xs bg-yellow-400 text-indigo-950 font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">ESPOL</span>
+                    </h1>
+                    <p class="text-xs text-indigo-200">Base de Datos - Paralelo 5 | Fase 1</p>
+                </div>
+            </div>
+
+            <!-- SELECTOR RÁPIDO DE ROL (RF15) -->
+            <div class="flex items-center space-x-4 bg-indigo-950/70 px-4 py-2 rounded-xl border border-indigo-700/50">
+                <div class="text-right hidden sm:block">
+                    <div class="text-xs text-indigo-300">Usuario Activo:</div>
+                    <div class="text-sm font-semibold text-white flex items-center gap-1.5" id="user-display">
+                        <i class="fa-solid fa-user-circle text-yellow-400"></i>
+                        <span id="current-user-name">Lady Zuñiga</span>
+                    </div>
+                </div>
+                <div class="border-l border-indigo-800 pl-3">
+                    <label class="text-[10px] text-indigo-300 uppercase block font-bold">Probar Rol:</label>
+                    <select id="role-switcher" onchange="switchRole(this.value)" class="bg-indigo-800 text-white text-xs font-semibold px-2.5 py-1.5 rounded-lg border border-indigo-600 focus:outline-none focus:ring-2 focus:ring-yellow-400 cursor-pointer">
+                        <option value="Administrador" selected>👑 Administrador</option>
+                        <option value="Gerente">👔 Gerente</option>
+                        <option value="Empleado">💼 Empleado</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- BARRA DE NAVEGACIÓN POR MÓDULOS -->
+        <nav class="bg-indigo-950 border-t border-indigo-800 px-4 overflow-x-auto">
+            <div class="max-w-7xl mx-auto flex space-x-1 py-1.5 text-xs font-medium whitespace-nowrap">
+                <button onclick="navigateTab('dashboard')" id="tab-btn-dashboard" class="nav-tab active-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all">
+                    <i class="fa-solid fa-chart-pie"></i> Dashboard & Reportes
+                </button>
+                <button onclick="navigateTab('clientes')" id="tab-btn-clientes" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all">
+                    <i class="fa-solid fa-users"></i> Clientes
+                </button>
+                <button onclick="navigateTab('vehiculos')" id="tab-btn-vehiculos" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all">
+                    <i class="fa-solid fa-car"></i> Flota de Vehículos
+                </button>
+                <button onclick="navigateTab('catalogos')" id="tab-btn-catalogos" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all">
+                    <i class="fa-solid fa-tags"></i> Marcas / Modelos
+                </button>
+                <button onclick="navigateTab('reservas')" id="tab-btn-reservas" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all">
+                    <i class="fa-solid fa-calendar-check"></i> Reservas
+                </button>
+                <button onclick="navigateTab('alquileres')" id="tab-btn-alquileres" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all">
+                    <i class="fa-solid fa-key"></i> Alquileres
+                </button>
+                <button onclick="navigateTab('pagos')" id="tab-btn-pagos" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all">
+                    <i class="fa-solid fa-money-bill-wave"></i> Pagos
+                </button>
+                <button onclick="navigateTab('devoluciones')" id="tab-btn-devoluciones" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all">
+                    <i class="fa-solid fa-rotate-left"></i> Devoluciones
+                </button>
+                <button onclick="navigateTab('mantenimientos')" id="tab-btn-mantenimientos" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all">
+                    <i class="fa-solid fa-wrench"></i> Mantenimiento
+                </button>
+                <button onclick="navigateTab('empleados')" id="tab-btn-empleados" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all">
+                    <i class="fa-solid fa-user-shield"></i> Empleados/Usuarios
+                </button>
+                <button onclick="navigateTab('reglas')" id="tab-btn-reglas" class="nav-tab flex items-center gap-2 px-3.5 py-2 rounded-lg transition-all text-yellow-300">
+                    <i class="fa-solid fa-book-bookmark"></i> Reglas de Negocio (RB)
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ÁREA DE NOTIFICACIONES TOAST -->
+    <div id="toast-container" class="fixed top-20 right-5 z-50 flex flex-col space-y-2 pointer-events-none"></div>
+
+    <!-- CONTENEDOR PRINCIPAL -->
+    <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6">
+
+        <!-- ============================================================= -->
+        <!-- TAB 1: DASHBOARD Y REPORTES (RF16) -->
+        <!-- ============================================================= -->
+        <section id="tab-dashboard" class="tab-content block space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Panel Principal y Reportes (RF16)</h2>
+                    <p class="text-sm text-slate-500">Métricas consolidadas de alquileres, ingresos, estado del parque automotor y mantenimientos.</p>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="loadDashboard()" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-semibold px-4 py-2 rounded-xl text-sm transition flex items-center gap-2 border border-indigo-200">
+                        <i class="fa-solid fa-rotate"></i> Actualizar Métricas
+                    </button>
+                </div>
+            </div>
+
+            <!-- TARJETAS KPIS -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Flota Total</p>
+                        <h3 class="text-3xl font-black text-slate-800 mt-1" id="kpi-total-vehiculos">-</h3>
+                        <p class="text-xs text-emerald-600 font-medium mt-1" id="kpi-disponibles-txt">- Disponibles</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-car-side"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Alquileres Activos</p>
+                        <h3 class="text-3xl font-black text-indigo-600 mt-1" id="kpi-alquileres-activos">-</h3>
+                        <p class="text-xs text-slate-500 mt-1" id="kpi-alquileres-total-txt">- Totales acumulados</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Ingresos por Pagos</p>
+                        <h3 class="text-3xl font-black text-emerald-600 mt-1" id="kpi-ingresos-totales">$0.00</h3>
+                        <p class="text-xs text-slate-500 mt-1">Registrados en caja</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-sack-dollar"></i>
+                    </div>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Costos Taller</p>
+                        <h3 class="text-3xl font-black text-amber-600 mt-1" id="kpi-costos-mantenimiento">$0.00</h3>
+                        <p class="text-xs text-slate-500 mt-1" id="kpi-en-mantenimiento-txt">- En taller hoy</p>
+                    </div>
+                    <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                        <i class="fa-solid fa-screwdriver-wrench"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- GRÁFICOS INTERACTIVOS (CHART.JS) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-donut text-indigo-600"></i> Estado Actual de la Flota Vehicular
+                    </h3>
+                    <div class="h-64 flex justify-center items-center">
+                        <canvas id="chart-flota"></canvas>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-bar text-emerald-600"></i> Distribución de Flota por Categoría
+                    </h3>
+                    <div class="h-64 flex justify-center items-center">
+                        <canvas id="chart-categorias"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TABLA DE ÚLTIMOS CONTRATOS -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="text-base font-bold text-slate-800 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i> Actividad Reciente de Alquileres
+                </h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-600 uppercase text-xs border-b">
+                            <tr>
+                                <th class="px-4 py-3">Contrato #</th>
+                                <th class="px-4 py-3">Cliente</th>
+                                <th class="px-4 py-3">Vehículo</th>
+                                <th class="px-4 py-3">Fecha Inicio</th>
+                                <th class="px-4 py-3">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dashboard-recent-rentals" class="divide-y divide-slate-100">
+                            <tr><td colspan="5" class="text-center py-4 text-slate-400">Cargando datos...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 2: CLIENTES (RF01 - RF04, RB01, RB15) -->
+        <!-- ============================================================= -->
+        <section id="tab-clientes" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Gestión de Clientes (RF01 - RF04)</h2>
+                    <p class="text-sm text-slate-500">Registro, consulta, actualización y eliminación con validación de integridad histórica (RB01 y RB15).</p>
+                </div>
+                <button onclick="openModalCliente()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-user-plus"></i> Nuevo Cliente (RF01)
+                </button>
+            </div>
+
+            <!-- BARRA DE BÚSQUEDA (RF02) -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex gap-3">
+                <div class="relative flex-grow">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3.5 text-slate-400"></i>
+                    <input type="text" id="filtro-cliente" oninput="buscarClientes(this.value)" placeholder="Buscar cliente por cédula, pasaporte, nombres o apellidos (RF02)..." class="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <button onclick="loadClientes()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-4 py-2.5 rounded-lg text-sm font-medium transition">
+                    <i class="fa-solid fa-rotate-right"></i>
+                </button>
+            </div>
+
+            <!-- TABLA DE CLIENTES -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase text-xs border-b">
+                            <tr>
+                                <th class="px-5 py-3.5">ID</th>
+                                <th class="px-5 py-3.5">Identificación (RB01)</th>
+                                <th class="px-5 py-3.5">Nombre Completo</th>
+                                <th class="px-5 py-3.5">Teléfono</th>
+                                <th class="px-5 py-3.5">Dirección</th>
+                                <th class="px-5 py-3.5 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-clientes-body" class="divide-y divide-slate-100">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 3: VEHÍCULOS (RF05 - RF08, RB02, RB05, RB06, RB17) -->
+        <!-- ============================================================= -->
+        <section id="tab-vehiculos" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Inventario de Vehículos (RF05 - RF08)</h2>
+                    <p class="text-sm text-slate-500">Gestión de la flota, tarifas, control de disponibilidad y estados operativos.</p>
+                </div>
+                <button onclick="openModalVehiculo()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-plus"></i> Registrar Vehículo (RF05)
+                </button>
+            </div>
+
+            <!-- FILTROS (RF06) -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200 flex flex-wrap gap-3 items-center">
+                <div class="flex-grow min-w-[200px] relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400"></i>
+                    <input type="text" id="filtro-vehiculo-q" oninput="loadVehiculos()" placeholder="Buscar por placa, marca o modelo..." class="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <select id="filtro-vehiculo-estado" onchange="loadVehiculos()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none">
+                        <option value="">Todos los Estados</option>
+                        <option value="Disponible">🟢 Disponible (RB05)</option>
+                        <option value="Alquilado">🔵 Alquilado</option>
+                        <option value="En Mantenimiento">🟠 En Mantenimiento (RB06)</option>
+                    </select>
+                </div>
+                <div>
+                    <select id="filtro-vehiculo-categoria" onchange="loadVehiculos()" class="border border-slate-300 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none">
+                        <option value="">Todas las Categorías</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- TABLA DE VEHÍCULOS -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase text-xs border-b">
+                            <tr>
+                                <th class="px-5 py-3.5">Placa (RB02)</th>
+                                <th class="px-5 py-3.5">Marca y Modelo</th>
+                                <th class="px-5 py-3.5">Año / Color</th>
+                                <th class="px-5 py-3.5">Categoría</th>
+                                <th class="px-5 py-3.5">Tarifa / Día</th>
+                                <th class="px-5 py-3.5">Estado</th>
+                                <th class="px-5 py-3.5 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-vehiculos-body" class="divide-y divide-slate-100">
+                            <!-- Inyectado por JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 4: CATÁLOGOS (RF09: MARCAS, MODELOS, CATEGORÍAS) -->
+        <!-- ============================================================= -->
+        <section id="tab-catalogos" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight">Marcas, Modelos y Categorías (RF09)</h2>
+                <p class="text-sm text-slate-500">Mantenimiento de los catálogos relacionales del sistema de vehículos.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- MARCAS -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-copyright text-indigo-600"></i> Marcas
+                        </h3>
+                    </div>
+                    <form onsubmit="crearMarca(event)" class="flex gap-2 mb-4">
+                        <input type="text" id="input-nueva-marca" placeholder="Nueva marca (ej. Mazda)" required class="flex-grow text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none">
+                        <button type="submit" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-semibold hover:bg-indigo-700">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </form>
+                    <ul id="lista-marcas" class="divide-y divide-slate-100 flex-grow max-h-72 overflow-y-auto text-sm">
+                        <!-- JS -->
+                    </ul>
+                </div>
+
+                <!-- MODELOS -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-shapes text-indigo-600"></i> Modelos
+                        </h3>
+                    </div>
+                    <form onsubmit="crearModelo(event)" class="space-y-2 mb-4">
+                        <select id="select-marca-para-modelo" required class="w-full text-xs px-3 py-2 rounded-lg border border-slate-300 bg-white">
+                            <option value="">Seleccione Marca...</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <input type="text" id="input-nuevo-modelo" placeholder="Nombre de modelo" required class="flex-grow text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none">
+                            <button type="submit" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-semibold hover:bg-indigo-700">
+                                <i class="fa-solid fa-plus"></i>
+                            </button>
+                        </div>
+                    </form>
+                    <ul id="lista-modelos" class="divide-y divide-slate-100 flex-grow max-h-72 overflow-y-auto text-sm">
+                        <!-- JS -->
+                    </ul>
+                </div>
+
+                <!-- CATEGORÍAS -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                            <i class="fa-solid fa-layer-group text-indigo-600"></i> Categorías
+                        </h3>
+                    </div>
+                    <form onsubmit="crearCategoria(event)" class="flex gap-2 mb-4">
+                        <input type="text" id="input-nueva-cat" placeholder="Nueva categoría" required class="flex-grow text-xs px-3 py-2 rounded-lg border border-slate-300 focus:outline-none">
+                        <button type="submit" class="bg-indigo-600 text-white px-3 py-2 rounded-lg text-xs font-semibold hover:bg-indigo-700">
+                            <i class="fa-solid fa-plus"></i>
+                        </button>
+                    </form>
+                    <ul id="lista-categorias" class="divide-y divide-slate-100 flex-grow max-h-72 overflow-y-auto text-sm">
+                        <!-- JS -->
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 5: RESERVAS (RF10, RB03, RB04, RB06) -->
+        <!-- ============================================================= -->
+        <section id="tab-reservas" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Gestión de Reservas (RF10)</h2>
+                    <p class="text-sm text-slate-500">Solicitudes temporales previas a alquiler con validación de no-solapamiento horario (RB04) y estado mecánico (RB06).</p>
+                </div>
+                <button onclick="openModalReserva()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-calendar-plus"></i> Nueva Reserva (RF10)
+                </button>
+            </div>
+
+            <!-- TABLA DE RESERVAS -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase text-xs border-b">
+                            <tr>
+                                <th class="px-5 py-3.5">ID</th>
+                                <th class="px-5 py-3.5">Cliente</th>
+                                <th class="px-5 py-3.5">Vehículo</th>
+                                <th class="px-5 py-3.5">Período Solicitado (RB04)</th>
+                                <th class="px-5 py-3.5">Atendido por</th>
+                                <th class="px-5 py-3.5">Estado</th>
+                                <th class="px-5 py-3.5 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-reservas-body" class="divide-y divide-slate-100">
+                            <!-- JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 6: ALQUILERES (RF11, RB05, RB06, RB07, RB08, RB09, RB16) -->
+        <!-- ============================================================= -->
+        <section id="tab-alquileres" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Contratos de Alquiler (RF11)</h2>
+                    <p class="text-sm text-slate-500">Formalización de contratos directos o desde reserva. Control de disponibilidad estricta (RB05) y coherencia temporal (RB09).</p>
+                </div>
+                <button onclick="openModalAlquilerDirecto()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-file-contract"></i> Nuevo Contrato Directo (RB16)
+                </button>
+            </div>
+
+            <!-- TABLA DE ALQUILERES -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase text-xs border-b">
+                            <tr>
+                                <th class="px-5 py-3.5">Contrato #</th>
+                                <th class="px-5 py-3.5">Cliente</th>
+                                <th class="px-5 py-3.5">Vehículo</th>
+                                <th class="px-5 py-3.5">Fecha Inicio</th>
+                                <th class="px-5 py-3.5">Devolución Prevista</th>
+                                <th class="px-5 py-3.5">Pagado / Tarifa</th>
+                                <th class="px-5 py-3.5">Estado</th>
+                                <th class="px-5 py-3.5 text-right">Operaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-alquileres-body" class="divide-y divide-slate-100">
+                            <!-- JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 7: PAGOS (RF12, RB10, RB11) -->
+        <!-- ============================================================= -->
+        <section id="tab-pagos" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Registro de Pagos (RF12)</h2>
+                    <p class="text-sm text-slate-500">Control de abonos y liquidaciones asociados a contratos de alquiler (RB10). Validación estricta monto > $0 (RB11).</p>
+                </div>
+                <button onclick="openModalNuevoPago()" class="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-emerald-200">
+                    <i class="fa-solid fa-receipt"></i> Registrar Pago (RF12)
+                </button>
+            </div>
+
+            <!-- TABLA DE PAGOS -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase text-xs border-b">
+                            <tr>
+                                <th class="px-5 py-3.5">Recibo #</th>
+                                <th class="px-5 py-3.5">Contrato #</th>
+                                <th class="px-5 py-3.5">Cliente</th>
+                                <th class="px-5 py-3.5">Fecha y Hora</th>
+                                <th class="px-5 py-3.5">Método de Pago</th>
+                                <th class="px-5 py-3.5">Empleado Cajero</th>
+                                <th class="px-5 py-3.5 text-right">Monto (RB11)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-pagos-body" class="divide-y divide-slate-100">
+                            <!-- JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 8: DEVOLUCIONES (RF13, RB12, RB13) -->
+        <!-- ============================================================= -->
+        <section id="tab-devoluciones" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Devolución de Vehículos (RF13)</h2>
+                    <p class="text-sm text-slate-500">Recepción técnica final del vehículo, registro único por contrato (RB12) e inspección de estado físico.</p>
+                </div>
+                <button onclick="openModalDevolucion()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-clipboard-check"></i> Registrar Devolución (RF13)
+                </button>
+            </div>
+
+            <!-- TABLA DE DEVOLUCIONES -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase text-xs border-b">
+                            <tr>
+                                <th class="px-5 py-3.5">ID Devolución</th>
+                                <th class="px-5 py-3.5">Contrato</th>
+                                <th class="px-5 py-3.5">Cliente</th>
+                                <th class="px-5 py-3.5">Vehículo</th>
+                                <th class="px-5 py-3.5">Fecha Recepción</th>
+                                <th class="px-5 py-3.5">Estado de Recepción</th>
+                                <th class="px-5 py-3.5">Observaciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-devoluciones-body" class="divide-y divide-slate-100">
+                            <!-- JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 9: MANTENIMIENTOS (RF14, RB06, RB14) -->
+        <!-- ============================================================= -->
+        <section id="tab-mantenimientos" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Gestión de Taller y Mantenimiento (RF14)</h2>
+                    <p class="text-sm text-slate-500">Historial preventivo y correctivo por vehículo (RB14). Restricción de alquiler en taller (RB06).</p>
+                </div>
+                <button onclick="openModalMantenimiento()" class="bg-amber-600 hover:bg-amber-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-amber-200">
+                    <i class="fa-solid fa-wrench"></i> Nueva Orden de Taller (RF14)
+                </button>
+            </div>
+
+            <!-- TABLA DE MANTENIMIENTO -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase text-xs border-b">
+                            <tr>
+                                <th class="px-5 py-3.5">Orden #</th>
+                                <th class="px-5 py-3.5">Vehículo</th>
+                                <th class="px-5 py-3.5">Fecha</th>
+                                <th class="px-5 py-3.5">Tipo</th>
+                                <th class="px-5 py-3.5">Descripción de Trabajos</th>
+                                <th class="px-5 py-3.5">Técnico / Empleado</th>
+                                <th class="px-5 py-3.5 text-right">Costo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-mantenimientos-body" class="divide-y divide-slate-100">
+                            <!-- JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 10: EMPLEADOS Y USUARIOS (RF15) -->
+        <!-- ============================================================= -->
+        <section id="tab-empleados" class="tab-content hidden space-y-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <div>
+                    <h2 class="text-2xl font-black text-slate-800 tracking-tight">Administración de Empleados y Usuarios (RF15)</h2>
+                    <p class="text-sm text-slate-500">Gestión de personal de AutoRent, credenciales y asignación de roles (Administrador, Gerente, Empleado).</p>
+                </div>
+                <button onclick="openModalEmpleado()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-4 py-2.5 rounded-xl text-sm transition flex items-center gap-2 shadow-md shadow-indigo-200">
+                    <i class="fa-solid fa-user-shield"></i> Nuevo Empleado (RF15)
+                </button>
+            </div>
+
+            <!-- TABLA DE EMPLEADOS -->
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm">
+                        <thead class="bg-slate-50 text-slate-700 font-semibold uppercase text-xs border-b">
+                            <tr>
+                                <th class="px-5 py-3.5">ID</th>
+                                <th class="px-5 py-3.5">Nombres y Apellidos</th>
+                                <th class="px-5 py-3.5">Usuario de Acceso</th>
+                                <th class="px-5 py-3.5">Rol en el Sistema</th>
+                                <th class="px-5 py-3.5">Estado</th>
+                                <th class="px-5 py-3.5 text-right">Acción Rápida</th>
+                            </tr>
+                        </thead>
+                        <tbody id="table-empleados-body" class="divide-y divide-slate-100">
+                            <!-- JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============================================================= -->
+        <!-- TAB 11: REGLAS DE NEGOCIO (RB01 - RB17) -->
+        <!-- ============================================================= -->
+        <section id="tab-reglas" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h2 class="text-2xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                    <i class="fa-solid fa-clipboard-check text-yellow-500"></i> Matriz de Reglas de Negocio (RB01 a RB17)
+                </h2>
+                <p class="text-sm text-slate-500">Cada regla del documento técnico se encuentra implementada activamente en la base de datos (DDL, Triggers, Constraints) y en el backend Python.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="reglas-cards-container">
+                <!-- Inyectado por JS o estático -->
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODALES / FORMULARIOS DINÁMICOS -->
+
+    <!-- MODAL CLIENTE -->
+    <div id="modal-cliente" class="modal-backdrop hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800" id="modal-cliente-title">Registrar Cliente (RF01)</h3>
+                <button onclick="closeModal('modal-cliente')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="guardarCliente(event)" class="space-y-3">
+                <input type="hidden" id="cliente-id">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Cédula / Pasaporte (RB01):</label>
+                    <input type="text" id="cliente-cedula" required placeholder="Ej. 0923456781" class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombres:</label>
+                        <input type="text" id="cliente-nombres" required placeholder="Ej. Juan" class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Apellidos:</label>
+                        <input type="text" id="cliente-apellidos" required placeholder="Ej. Pérez" class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Teléfono:</label>
+                    <input type="text" id="cliente-telefono" required placeholder="Ej. 0991234567" class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Dirección domiciliaria:</label>
+                    <input type="text" id="cliente-direccion" required placeholder="Ej. Cdla. Kennedy Norte, Mz 10" class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-cliente')" class="px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 font-semibold rounded-lg">Guardar Cliente</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL VEHÍCULO -->
+    <div id="modal-vehiculo" class="modal-backdrop hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800" id="modal-vehiculo-title">Registrar Vehículo (RF05)</h3>
+                <button onclick="closeModal('modal-vehiculo')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="guardarVehiculo(event)" class="space-y-3">
+                <input type="hidden" id="vehiculo-id">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Placa / Matrícula (RB02):</label>
+                        <input type="text" id="vehiculo-matricula" required placeholder="Ej. GBA-2024" class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Año:</label>
+                        <input type="number" id="vehiculo-año" min="2000" max="2027" value="2024" required class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Modelo de Vehículo:</label>
+                        <select id="vehiculo-modelo" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                            <!-- Inyectado por JS -->
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Categoría:</label>
+                        <select id="vehiculo-categoria" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                            <!-- Inyectado por JS -->
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Color:</label>
+                        <input type="text" id="vehiculo-color" required placeholder="Blanco" class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Capacidad:</label>
+                        <input type="number" id="vehiculo-capacidad" min="1" value="5" required class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tarifa/Día ($):</label>
+                        <input type="number" step="0.01" id="vehiculo-tarifa" min="1" value="45.00" required class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado Operativo:</label>
+                    <select id="vehiculo-estado" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <option value="Disponible">Disponible</option>
+                        <option value="Alquilado">Alquilado</option>
+                        <option value="En Mantenimiento">En Mantenimiento</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-vehiculo')" class="px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 font-semibold rounded-lg">Guardar Vehículo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL RESERVA -->
+    <div id="modal-reserva" class="modal-backdrop hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800">Crear Solicitud de Reserva (RF10)</h3>
+                <button onclick="closeModal('modal-reserva')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="guardarReserva(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Cliente Titular (RB03):</label>
+                    <select id="reserva-cliente" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <!-- JS -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Vehículo Solicitado (RB06: No en taller):</label>
+                    <select id="reserva-vehiculo" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <!-- JS -->
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Fecha y Hora Inicio:</label>
+                        <input type="datetime-local" id="reserva-inicio" required class="w-full text-sm px-3 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Fecha y Hora Fin:</label>
+                        <input type="datetime-local" id="reserva-fin" required class="w-full text-sm px-3 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado de Reserva:</label>
+                    <select id="reserva-estado" class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <option value="Confirmada">Confirmada (aplica validación RB04 de no solapamiento)</option>
+                        <option value="Pendiente">Pendiente</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-reserva')" class="px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 font-semibold rounded-lg">Crear Reserva</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ALQUILER DIRECTO O DESDE RESERVA -->
+    <div id="modal-alquiler" class="modal-backdrop hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800" id="modal-alquiler-title">Formalizar Contrato de Alquiler (RF11)</h3>
+                <button onclick="closeModal('modal-alquiler')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="guardarAlquiler(event)" class="space-y-3">
+                <input type="hidden" id="alquiler-id-reserva">
+                <div id="alquiler-reserva-info" class="hidden p-3 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg text-xs">
+                    <i class="fa-solid fa-info-circle mr-1"></i> Este alquiler se origina de la Reserva #<span id="txt-id-reserva-origen"></span>.
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Cliente:</label>
+                    <select id="alquiler-cliente" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <!-- JS -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Vehículo (RB05: Solo 'Disponible'):</label>
+                    <select id="alquiler-vehiculo" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <!-- JS -->
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Fecha y Hora Inicio (RB08):</label>
+                        <input type="datetime-local" id="alquiler-inicio" required class="w-full text-sm px-3 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Devolución Prevista (RB09 > Inicio):</label>
+                        <input type="datetime-local" id="alquiler-fin" required class="w-full text-sm px-3 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-alquiler')" class="px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 font-semibold rounded-lg">Formalizar Alquiler</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL REGISTRO DE PAGO -->
+    <div id="modal-pago" class="modal-backdrop hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800">Registrar Pago de Alquiler (RF12)</h3>
+                <button onclick="closeModal('modal-pago')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="guardarPago(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Contrato de Alquiler (RB10):</label>
+                    <select id="pago-alquiler" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <!-- JS -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Monto a Cobrar ($) (RB11: > 0):</label>
+                    <input type="number" step="0.01" min="0.01" id="pago-monto" required placeholder="0.00" class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-emerald-500 focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Método de Pago:</label>
+                    <select id="pago-metodo" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Tarjeta de Crédito">Tarjeta de Crédito</option>
+                        <option value="Tarjeta de Débito">Tarjeta de Débito</option>
+                        <option value="Transferencia Bancaria">Transferencia Bancaria</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-pago')" class="px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm text-white bg-emerald-600 hover:bg-emerald-700 font-semibold rounded-lg">Registrar Pago</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DEVOLUCIÓN -->
+    <div id="modal-devolucion" class="modal-backdrop hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800">Recepción / Devolución de Vehículo (RF13)</h3>
+                <button onclick="closeModal('modal-devolucion')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="guardarDevolucion(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Contrato Activo (RB12 y RB13):</label>
+                    <select id="devolucion-alquiler" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <!-- JS: solo alquileres activos sin devolución -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Estado de Recepción Técnica:</label>
+                    <select id="devolucion-estado-recepcion" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <option value="Excelente">Excelente (Reintegra a 'Disponible')</option>
+                        <option value="Bueno">Bueno (Reintegra a 'Disponible')</option>
+                        <option value="Con Daños">Con Daños (Pasa automáticamente a 'En Mantenimiento')</option>
+                        <option value="Requiere Mantenimiento">Requiere Mantenimiento (Pasa a 'En Mantenimiento')</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Observaciones / Inspección:</label>
+                    <textarea id="devolucion-obs" rows="3" placeholder="Detalle el kilometraje, nivel de combustible, rayones o novedades..." class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-devolucion')" class="px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 font-semibold rounded-lg">Confirmar Retorno</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL MANTENIMIENTO -->
+    <div id="modal-mantenimiento" class="modal-backdrop hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800">Orden de Mantenimiento (RF14)</h3>
+                <button onclick="closeModal('modal-mantenimiento')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="guardarMantenimiento(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Vehículo (RB14):</label>
+                    <select id="mantenimiento-vehiculo" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <!-- JS -->
+                    </select>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Tipo:</label>
+                        <select id="mantenimiento-tipo" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                            <option value="Preventivo">Preventivo</option>
+                            <option value="Correctivo">Correctivo</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Costo Estimado ($):</label>
+                        <input type="number" step="0.01" min="0" value="0.00" id="mantenimiento-costo" required class="w-full text-sm px-3 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Descripción del Trabajo Mecánico:</label>
+                    <textarea id="mantenimiento-descripcion" rows="3" required placeholder="Detalle los trabajos a realizar..." class="w-full text-sm px-3.5 py-2 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"></textarea>
+                </div>
+                <div class="flex items-center gap-2 pt-1">
+                    <input type="checkbox" id="mantenimiento-bloquear" checked class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500">
+                    <label for="mantenimiento-bloquear" class="text-xs text-slate-600 font-medium">Marcar vehículo como 'En Mantenimiento' (RB06)</label>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-mantenimiento')" class="px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm text-white bg-amber-600 hover:bg-amber-700 font-semibold rounded-lg">Registrar Orden</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL NUEVO EMPLEADO -->
+    <div id="modal-empleado" class="modal-backdrop hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-lg font-bold text-slate-800">Registrar Empleado / Usuario (RF15)</h3>
+                <button onclick="closeModal('modal-empleado')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="guardarEmpleado(event)" class="space-y-3">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombres:</label>
+                        <input type="text" id="emp-nombres" required class="w-full text-sm px-3 py-2 border rounded-lg">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Apellidos:</label>
+                        <input type="text" id="emp-apellidos" required class="w-full text-sm px-3 py-2 border rounded-lg">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Nombre de Usuario:</label>
+                    <input type="text" id="emp-usuario" required placeholder="ej. jsmith" class="w-full text-sm px-3 py-2 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Contraseña:</label>
+                    <input type="password" id="emp-clave" required class="w-full text-sm px-3 py-2 border rounded-lg">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase mb-1">Rol de Acceso:</label>
+                    <select id="emp-rol" required class="w-full text-sm px-3 py-2 border rounded-lg bg-white">
+                        <option value="Empleado">Empleado (Operativo)</option>
+                        <option value="Gerente">Gerente (Supervisión / Reportes)</option>
+                        <option value="Administrador">Administrador (Total)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-2 pt-3 border-t">
+                    <button type="button" onclick="closeModal('modal-empleado')" class="px-4 py-2 text-sm text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancelar</button>
+                    <button type="submit" class="px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 font-semibold rounded-lg">Crear Usuario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- PIE DE PÁGINA -->
+    <footer class="bg-slate-900 text-slate-400 text-xs py-4 border-t border-slate-800 mt-auto">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left">
+            <div>
+                <span class="font-bold text-slate-200">AutoRent v1.0</span> | Proyecto de Base de Datos - Paralelo 5 ESPOL
+            </div>
+            <div class="text-[11px] text-slate-400">
+                Equipo: Leonardo Estrada • María Suarez • Luis Peñaherrera • Samantha Vera • Lady Zuñiga
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPT PRINCIPAL -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
+

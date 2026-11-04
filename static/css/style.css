@@ -1,0 +1,70 @@
+/* Custom Styles for AutoRent */
+
+.active-tab {
+    background-color: #4f46e5 !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.2);
+}
+
+.nav-tab {
+    color: #cbd5e1;
+}
+
+.nav-tab:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+/* Modal animation */
+.modal-backdrop {
+    animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.98); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Status Badges */
+.badge-disponible {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+
+.badge-alquilado {
+    background-color: #eff6ff;
+    color: #1e40af;
+    border: 1px solid #bfdbfe;
+}
+
+.badge-mantenimiento {
+    background-color: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+}
+
+.badge-confirmada {
+    background-color: #ecfdf5;
+    color: #047857;
+    border: 1px solid #6ee7b7;
+}
+
+.badge-pendiente {
+    background-color: #fefce8;
+    color: #a16207;
+    border: 1px solid #fef08a;
+}
+
+.badge-completada {
+    background-color: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+}
+
+.badge-cancelada {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
